@@ -13,7 +13,6 @@ from transformers import BertTokenizer, BertModel
 
 from utils import train_classifier, eval_classifier, eval_classifier_ood
 import data
-import reporter
 
 # The size to cap the training data. Size is measured in cased nouns.
 # We chose the number of cased nouns in Basque as our limit.
