@@ -246,7 +246,7 @@ def get_bert_outputs(hdf5_path, bert_ids, bert_model):
         print(f"Running {len(bert_ids)} sentences through BERT. This takes a while")
         for idx, sentence in enumerate(tqdm(bert_ids)):
             encoded_layers, _, hidden_layers = \
-                bert_model(torch.tensor(sentence).unsqueeze(0))
+                bert_model(torch.tensor(sentence).unsqueeze(0), return_dict=False)
             outputs.append(np.vstack([np.array(x) for x in hidden_layers]))
 
             layer_count = len(hidden_layers)
