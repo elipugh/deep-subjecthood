@@ -5,9 +5,13 @@ curbatch = []
 for seed in range(1):
     for sink_idx, sink in enumerate([i.strip() for i in open("sink_langs.txt").readlines()]):
         for source in [i.strip() for i in open("source_langs.txt").readlines()]:
-            source = source.strip("-train.conllu")
-            if sink.strip('-train.conllu') == source:
-                sink_file = sink.strip("-train.conllu") + "-test.conllu"
+            if source.endswith('-train.conllu'):
+                source = source[:-len("-train.conllu")]
+            sinkstrip = sink
+            if sinkstrip.endswith('-train.conllu'):
+                sinkstrip = sinkstrip[:-len("-train.conllu")]
+            if sinkstrip == source:
+                sink_file = sinkstrip + "-test.conllu"
             else:
                 sink_file = sink
             output_fn = os.path.join(results_dir, source.split("/")[-1] + "_" + sink_file.split("/")[-1] + "_" + str(seed))
