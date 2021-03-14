@@ -171,7 +171,10 @@ class CaseLayerDataset(data.Dataset):
             out_word_forms.append(word_forms_list[sentence_num][word_num])
             out_animacy_labels.append(animacy_labels[sentence_num][word_num])
             bert_start_index = orig_to_bert_map[sentence_num][word_num]
-            bert_end_index = orig_to_bert_map[sentence_num][word_num + 1]
+            if len(orig_to_bert_map[sentence_num]) > word_num+1:
+              bert_end_index = orig_to_bert_map[sentence_num][word_num + 1]
+            else:
+              bert_end_index = -1
             bert_sentence = bert_outputs[sentence_num][self.layer_num].squeeze()
             if pool_method == "first":
                 train.append(bert_sentence[bert_start_index])
