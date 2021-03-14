@@ -1,0 +1,58 @@
+{
+
+    "verbs of emission":[
+        "beam", "blaze", "blink", "burn", "flame", "flare", "flash", "flicker", "glare", "gleam", "glimmer", "glint", "glisten", "glitter", "glow", "incandesce", "scintillate", "shimmer", "shine", "sparkle", "twinkle",
+        "babble", "bang", "beat", "beep", "bellow", "blare", "blast", "blat", "boom", "bubble", "burble", "burr", "buzz", "chatter", "chime", "chink", "chir", "chitter", "chug", "clack", "clang", "clank", "clap", "clash", "clatter", "click", "cling", "clink", "clomp", "clump", "clunk", "crack", "crackle", "crash", "creak", "crepitate", "crunch", "cry", "ding", "dong", "explode", "fizz", "fizzle", "groan", "growl", "gurgle", "hiss", "hoot", "howl", "hum", "jangle", "jingle", "knell", "knock", "lilt", "moan", "murmur", "patter", "peal", "ping", "pink", "pipe", "plink", "plonk", "plop", "plunk", "pop", "purr", "putter", "rap", "rasp", "rattle", "ring", "roar", "roll", "rumble", "rustle", "scream", "screech", "shriek", "shrill", "sing", "sizzle", "snap", "splash", "splutter", "sputter", "squawk", "squeak", "squeal", "squelch", "strike", "swish", "swoosh", "thrum", "thud", "thump", "thunder", "thunk", "tick", "ting", "tinkle", "toll", "toot", "tootle", "trill", "trumpet", "twang", "ululate", "vroom", "wail", "wheeze", "whine", "whir", "whish", "whistle", "whoosh", "whump", "zing",
+        "reek", "smell", "stink",
+        "belch", "bleed", "bubble", "dribble", "drip", "drool", "emanate", "exude", "foam", "gush", "leak", "ooze", "pour", "puff", "radiate", "seep", "shed", "slop", "spew", "spill", "spout", "sprout", "spurt", "squirt", "steam", "stream", "sweat"
+    ],
+
+
+    "verbs of inherently directed motion":[
+        "advance", "arrive", "ascend", "climb", "come", "cross", "depart", "descend", "enter", "escape", "exit", "fall", "flee", "go", "leave", "plunge", "recede", "return", "rise", "tumble"
+    ],
+
+
+    "verbs of manner of motion":[
+        "bounce", "coil", "drift", "drop", "float", "glide", "move", "revolve", "roll", "rotate", "slide", "spin", "swing", "turn", "twirl", "twist", "whirl", "wind"
+        "amble", "backpack", "bolt", "bounce", "bound", "bowl", "canter", "carom", "cavort", "charge", "clamber", "climb", "clump", "coast", "crawl", "creep", "dart", "dash", "dodder", "drift", "file", "flit", "float", "fly", "frolic", "gallop", "gambol", "glide", "goosestep", "hasten", "hike", "hobble", "hop", "hurry", "hurtle", "inch", "jog", "journey", "jump", "leap", "limp", "lollop", "lope", "lumber", "lurch", "march", "meander", "mince", "mosey", "nip", "pad", "parade", "perambulate", "plod", "prance", "promenade", "prowl", "race", "ramble", "roam", "roll", "romp", "rove", "run", "rush", "sashay", "saunter", "scamper", "scoot", "scram", "scramble", "scud", "scurry", "scutter", "scuttle", "shamble", "shuffle", "sidle", "skeddadle", "skip", "skitter", "skulk", "sleepwalk", "slide", "slink", "slither", "slog", "slouch", "sneak", "somersault", "speed", "stagger", "stomp", "stray", "streak", "stride", "stroll", "strut", "stumble", "stump", "swagger", "sweep", "swim", "tack", "tear", "tiptoe", "toddle", "totter", "traipse", "tramp", "travel", "trek", "troop", "trot", "trudge", "trundle", "vault", "waddle", "wade", "walk", "wander", "whiz", "zigzag", "zoom"
+    ],
+
+
+    "verbs of existence and appearance":[
+        "coexist", "correspond", "depend", "dwell", "endure", "exist", "extend", "flourish", "languish", "linger", "live", "loom", "lurk", "overspread", "persist", "predominate", "prevail", "prosper", "remain", "reside", "shelter", "stay", "survive", "thrive", "tower", "wait",
+        "appear", "arise", "awake", "awaken", "break", "burst", "come", "dawn", "derive", "develop", "emanate", "emerge", "erupt", "evolve", "exude", "flow", "form", "grow", "gush", "issue", "materialize", "open", "plop", "result", "rise", "spill", "spread", "steal", "stem", "stream", "supervene", "surge", "wax",
+        "ensue", "eventuate", "happen", "occur", "recur", "transpire"
+    ],
+
+
+    "verbs of spatial configuration":[
+        "balance", "bend", "bow", "crouch", "dangle", "flop", "fly", "hang", "hover", "jut", "kneel", "lean", "lie", "loll", "loom", "lounge", "nestle", "open", "perch", "plop", "project", "protrude", "recline", "rest", "rise", "roost", "sag", "sit", "slope", "slouch", "slump", "sprawl", "squat", "stand", "stoop", "straddle", "swing", "tilt", "tower"
+    ],
+
+
+    "verbs of disappearance":[
+        "die", "disappear", "expire", "lapse", "perish", "vanish"
+    ],
+
+
+    "externally caused verbs of change of state":[
+        "break", "chip", "crack", "crash", "crush", "fracture", "rip", "shatter", "smash", "snap", "splinter", "split", "tear",
+        "bend", "crease", "crinkle", "crumple", "fold", "rumple", "wrinkle",
+        "bake", "barbecue", "blanch", "boil", "braise", "broil", "brown", "charbroil", "charcoal-broil", "coddle", "cook", "crisp", "deep-fry", "French fry", "fry", "grill", "hardboil", "heat", "microwave", "oven-fry", "oven-poach", "overcook", "pan­ broil", "pan-fry", "parboil", "parch", "percolate", "perk", "plank", "poach", "pot-roast", "rissole", "roast", "sauté", "scald", "scallop", "shirr", "simmer", "softboil", "steam", "steam- bake", "stew", "stir-fry", "toast",
+        "abate", "advance", "age", "air", "alter", "atrophy", "awake", "balance", "blast", "blur", "burn", "burst", "capsize", "change", "char", "chill", "clog", "close", "collapse", "collect", "compress", "condense", "contract", "corrode", "crumble", "decompose", "decrease", "deflate", "defrost", "degrade", "diminish", "dissolve", "distend", "divide", "double", "drain", "ease", "enlarge", "expand", "explode", "fade", "fill", "flood", "fray", "freeze", "frost", "fuse", "grow", "halt", "heal", "heat", "hush", "ignite", "improve", "increase", "inflate", "kindle", "light", "loop", "mature", "melt", "multiply", "overturn", "pop", "quadruple", "rekindle", "reopen", "reproduce", "rupture", "scorch", "sear", "short", "short-circuit", "shrink", "shrivel", "singe", "sink", "soak", "splay", "sprout", "steep", "stretch", "submerge", "subside", "taper", "thaw", "tilt", "tire", "topple", "triple", "unfold", "vary", "warp",
+        "blunt", "clean", "clear", "cool", "crisp", "dim", "dirty", "double", "dry", "dull", "empty", "even", "firm", "level", "loose", "mellow", "muddy", "narrow", "open", "pale", "quiet", "round", "shut", "slack", "slim", "slow", "smooth", "sober", "sour", "steady", "tame", "tense", "thin", "triple", "warm",
+        "blacken", "brown", "crimson", "gray", "green", "purple", "redden", "silver", "tan", "whiten", "yellow",
+        "awaken", "brighten", "broaden", "cheapen", "coarsen", "dampen", "darken", "deepen", "fatten", "flatten", "freshen", "gladden", "harden", "hasten", "heighten; lengthen", "lessen", "lighten", "loosen", "moisten", "neaten", "quicken", "quieten", "ripen", "roughen", "sharpen", "shorten", "sicken", "slacken", "smarten", "soften", "steepen", "stiffen", "straighten", "strengthen", "sweeten", "tauten", "thicken", "tighten", "toughen", "waken", "weaken", "widen", "worsen",
+        "acetify", "acidify", "alkalify", "calcify", "carbonify", "dehumidify", "emulsify", "fructify", "gasify", "humidify", "intensify", "lignify", "liquefy", "magnify", "nitrify", "ossify", "petrify", "purify", "putrefy", "silicify", "solidify", "stratify", "vitrify",
+        "americanize", "caramelize", "carbonize", "crystallize", "decentralize", "demagnetize", "democratize", "depressurize", "destabilize", "energize", "equalize", "fossilize", "gelatinize", "glutenize", "harmonize", "hybridize", "iodize", "ionize", "magnetize", "neutralize", "oxidize", "polarize", "pulverize", "regularize", "stabilize", "unionize", "vaporize", "volatilize", "westernize",
+        "accelerate", "agglomerate", "ameliorate", "attenuate", "coagulate", "decelerate", "deescalate", "degenerate", "desiccate", "deteriorate", "detonate", "disintegrate", "dissipate", "evaporate", "federate", "granulate", "incubate", "levitate", "macerate", "operate", "proliferate", "propagate", "ulcerate", "vibrate"
+    ],
+
+
+    "internally caused verbs of change of state":[
+        "blister", "bloom", "blossom", "bum", "corrode", "decay", "deteriorate", "erode", "ferment", "flower", "germinate", "molder", "molt", "rot", "rust", "sprout", "stagnate", "swell", "tarnish", "wilt", "wither"
+    ]
+
+}
+
