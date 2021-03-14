@@ -118,7 +118,7 @@ def get_tokens_and_labels(filename, limit=-1, case_set=None,
             sent_role_labels.append(token_role)
             sent_forms.append(token_forms)
             sent_animacies.append(token_animacy)
-            if 'verb' in token_forms:
+            if token_forms is not None:
                 sent_verb_types.append(verb2type[token_forms['verb']])
             else:
                 sent_verb_types.append("")
