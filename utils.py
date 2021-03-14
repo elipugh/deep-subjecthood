@@ -24,8 +24,9 @@ import json
 with open('verb_types.json') as f:
     verb_types = json.load(f)
 verb2type = defaultdict(str)
-for vt,verb in verb_types.items():
-    verb2type[verb] = vt[0]
+for vt,verbs in verb_types.items():
+    for verb in verbs:
+        verb2type[verb] = vt[0]
 
 BERT_DIM = 768
 
