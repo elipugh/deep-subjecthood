@@ -47,13 +47,13 @@ class CaseDataset:
       if os.path.exists(tokens_labels_path):
           print("Loading all of the tokens and non-bert stuff from", tokens_labels_path)
           self.tokens, self.case_labels, self.role_labels, self.word_forms_list, \
-          self.animacy_labels, self.len, self.relevant_examples_index, \
+          self.animacy_labels, self.verb_type_labels, self.len, self.relevant_examples_index, \
           self.cases_per_role,self.bert_tokens, self.bert_ids, self.orig_to_bert_map, \
           self.bert_to_orig_map = \
               pickle.load(open(tokens_labels_path, 'rb'))
       else:
           self.tokens, self.case_labels, self.role_labels, self.word_forms_list, \
-          self.animacy_labels, self.len, self.relevant_examples_index, self.cases_per_role  = \
+          self.animacy_labels, self.verb_type_labels, self.len, self.relevant_examples_index, self.cases_per_role  = \
               utils.get_tokens_and_labels(self.fname, limit=limit, case_set=case_set, role_set=role_set, balanced=balanced)
           self.bert_tokens, self.bert_ids, self.orig_to_bert_map, self.bert_to_orig_map = \
               utils.get_bert_tokens(self.tokens, tokenizer)
@@ -61,7 +61,7 @@ class CaseDataset:
           print("Saving all of the tokens and non-bert stuff to", tokens_labels_path)
           pickle.dump(
               (self.tokens, self.case_labels, self.role_labels, self.word_forms_list,
-               self.animacy_labels, self.len, self.relevant_examples_index,
+               self.animacy_labels, self.verb_type_labels, self.len, self.relevant_examples_index,
                self.cases_per_role,self.bert_tokens, self.bert_ids, 
                self.orig_to_bert_map, self.bert_to_orig_map),
               open(tokens_labels_path, 'wb'))
@@ -101,10 +101,10 @@ class CaseLayerDataset(data.Dataset):
       self.balanced = self.case_dataset.balanced
       self.pool_method = "average" if case_dataset.average else "first"
       self.embs, self.role_labels, self.case_labels, self.word_forms, \
-      self.animacy_labels, self.idxs, indices_by_role = \
+      self.animacy_labels, self.verb_type_labels, self.idxs, indices_by_role = \
         self.get_labels(case_dataset.bert_outputs, case_dataset.role_labels,
                         case_dataset.case_labels, case_dataset.word_forms_list,
-                        case_dataset.animacy_labels, case_dataset.orig_to_bert_map,
+                        case_dataset.animacy_labels, case_dataset.verb_type_labels, case_dataset.orig_to_bert_map,
                         case_dataset.relevant_examples_index, pool_method=self.pool_method)
       if self.balanced:
           min_role_len = min([len(indices_by_role[role]) for role in case_dataset.role_set])
@@ -121,6 +121,7 @@ class CaseLayerDataset(data.Dataset):
           self.case_labels = [self.case_labels[index] for index in combined_indices]
           self.word_forms = [self.word_forms[index] for index in combined_indices]
           self.animacy_labels = [self.animacy_labels[index] for index in combined_indices]
+          self.verb_type_labels = [self.verb_type_labels[index] for index in combined_indices]
           self.idxs = [self.idxs[index] for index in combined_indices]
 
       print("Examples #", len(self.idxs))
@@ -132,7 +133,8 @@ class CaseLayerDataset(data.Dataset):
     def __getitem__(self, idx):
         case_label = self.case_labels[idx] if self.case_labels[idx] is not None else ""
         animacy_label = self.animacy_labels[idx] if self.animacy_labels[idx] is not None else ""
-        return self.embs[idx], self.processed_labels[idx], (case_label, self.word_forms[idx], animacy_label, self.idxs[idx])
+        verb_type_label = self.verb_type_labels[idx] if self.verb_type_labels[idx] is not None else ""
+        return self.embs[idx], self.processed_labels[idx], (case_label, self.word_forms[idx], animacy_label, verb_type_label, self.idxs[idx])
 
 
     def __len__(self):
@@ -160,9 +162,9 @@ class CaseLayerDataset(data.Dataset):
     def get_num_labels(self):
       return len(self.labeldict)
 
-    def get_labels(self, bert_outputs, role_labels, case_labels, word_forms_list, animacy_labels, orig_to_bert_map, relevant_examples_index, pool_method="first"):
+    def get_labels(self, bert_outputs, role_labels, case_labels, word_forms_list, animacy_labels, verb_type_labels, orig_to_bert_map, relevant_examples_index, pool_method="first"):
         train = []
-        out_role_labels, out_case_labels, out_word_forms, out_animacy_labels, out_index = [], [], [], [], []
+        out_role_labels, out_case_labels, out_word_forms, out_animacy_labels, out_verb_type_labels, out_index = [], [], [], [], [], []
         indices_by_role = defaultdict(list)
         for sentence_num, word_num in relevant_examples_index:
             role_label = role_labels[sentence_num][word_num]
@@ -170,6 +172,7 @@ class CaseLayerDataset(data.Dataset):
             out_case_labels.append(case_labels[sentence_num][word_num])
             out_word_forms.append(word_forms_list[sentence_num][word_num])
             out_animacy_labels.append(animacy_labels[sentence_num][word_num])
+            out_verb_type_labels.append(verb_type_labels[sentence_num][word_num])
             bert_start_index = orig_to_bert_map[sentence_num][word_num]
             if len(orig_to_bert_map[sentence_num]) > word_num+1:
               bert_end_index = orig_to_bert_map[sentence_num][word_num + 1]
@@ -183,7 +186,7 @@ class CaseLayerDataset(data.Dataset):
             indices_by_role[role_label].append(len(out_role_labels) - 1)
             out_index.append((sentence_num, bert_start_index, bert_end_index, word_num))
 
-        return train, out_role_labels, out_case_labels, out_word_forms, out_animacy_labels, out_index, indices_by_role
+        return train, out_role_labels, out_case_labels, out_word_forms, out_animacy_labels, out_verb_type_labels, out_index, indices_by_role
 
     def get_dataloader(self, batch_size=32, shuffle=True):
       return data.DataLoader(self, batch_size=batch_size, shuffle=shuffle)
