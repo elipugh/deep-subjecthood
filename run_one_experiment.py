@@ -24,8 +24,8 @@ TEST_DATA_LIMIT = 2000
 
 def run_experiment(args):
     train_tb_name = os.path.split(args.train_lang_base_path)[1]
-    tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')
-    model = BertModel.from_pretrained('bert-base-multilingual-cased',
+    tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
+    model = BertModel.from_pretrained('bert-base-cased',
                                      output_hidden_states=True)
     model.eval()
     num_layers = model.config.num_hidden_layers
