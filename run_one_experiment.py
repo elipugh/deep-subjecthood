@@ -173,7 +173,7 @@ def __main__():
     parser.add_argument("--reeval-src-test", action="store_true",
                         help="Reevaluate the test set of the source language")
     parser.add_argument("--seed", type=int, default=-1, help="random seed")
-    parser.add_argument("--test_on_train", action='store_true', help="test on train S labels")
+    parser.add_argument("--test-on-train", action='store_true', help="test on train S labels")
 
     args = parser.parse_args()
 
