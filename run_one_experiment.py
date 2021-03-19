@@ -160,6 +160,9 @@ def __main__():
     parser.add_argument('--test-lang-fn', type=str,
         default="/u/nlp/data/dependency_treebanks/UD/2.5/UD_English-PUD/en_pud-ud-test.conllu",
         help="The path to the UD treebank file we're testing the classifier on")
+    parser.add_argument('--train-lang-fn', type=str,
+        default="/u/nlp/data/dependency_treebanks/UD/2.5/UD_English-PUD/en_pud-ud-train.conllu",
+        help="The path to the UD treebank file we're training the classifier on")
     parser.add_argument('--only-ao', action="store_true",
                         help="When this option is set, the classifier is trained only on A and O nouns (no S to give away alignment)")
     parser.add_argument('--balance', action='store_true', 
