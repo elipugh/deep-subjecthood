@@ -20,7 +20,7 @@ BASQUE_CASED_NOUNS = 13128
 BASQUE_AO_CASED_NOUNS = 4312
 BASQUE_AO_CASED_NOUNS_BALANCED = 2025
 
-TEST_DATA_LIMIT = 2000
+TEST_DATA_LIMIT = 2000000
 
 def run_experiment(args):
     train_tb_name = os.path.split(args.train_lang_base_path)[1]
@@ -93,6 +93,35 @@ def run_experiment(args):
         print(results)
         out_df = pd.concat((out_df, results), ignore_index=True)
 
+    if args.test_on_train:
+        if args.reeval_src_test:
+            print(f"Loading the source test set, with limit {TEST_DATA_LIMIT}")
+            src_test = data.CaseDataset(
+                args.train_lang_base_path + "-train.conllu", model, tokenizer,
+                limit=TEST_DATA_LIMIT, case_set=training_case_set, average=args.average_embs)
+        print(f"Loading the dest test set, with limit {TEST_DATA_LIMIT}")
+        dest_test = data.CaseDataset(args.train_lang_fn, model, tokenizer, limit=TEST_DATA_LIMIT, case_set=None, average=args.average_embs)
+        for layer in reversed(range(num_layers+1)):
+            print("On layer", layer)
+            classifier_path = classifier_paths[layer]
+            classifier, labelset, labeldict, src_test_accuracy, training_case_distribution = pickle.load(open(classifier_path, "rb"))
+            print(f"Loaded case classifier from {classifier_path}!")
+            print("src_test_accuracy:", src_test_accuracy)
+            if args.reeval_src_test:
+                src_test_dataset = data.CaseLayerDataset(src_test, layer_num=layer, labeldict=labeldict)
+                src_test_accuracy = eval_classifier(classifier, src_test_dataset)
+                print("src_test_accuracy [re-eval]:", src_test_accuracy, "Saving new src test accuracy")
+                with open(classifier_path, 'wb') as pkl_file:
+                    pickle.dump((classifier, labelset, labeldict, src_test_accuracy), pkl_file)
+            dest_test_dataset = data.CaseLayerDataset(dest_test, layer_num=layer, labeldict=labeldict)
+            print("There are", len(dest_test_dataset), "examples to evaluate on.")
+            results = eval_classifier_ood(classifier, labelset, dest_test_dataset)
+            results["layer"] = layer
+            for key in src_test_accuracy.keys():
+                results[f"source_test_accuracy_{key}"] = src_test_accuracy[key]
+            print(results)
+            out_df = pd.concat((out_df, results), ignore_index=True)
+
     out_df.to_csv(os.path.join("results", args.output_fn))
 
 def train_classifiers(args, classifier_paths, model, tokenizer, training_data_limit, training_role_set, training_case_set, balanced=False, average=False):
@@ -144,6 +173,7 @@ def __main__():
     parser.add_argument("--reeval-src-test", action="store_true",
                         help="Reevaluate the test set of the source language")
     parser.add_argument("--seed", type=int, default=-1, help="random seed")
+    parser.add_argument("--test_on_train", action='store_true', help="test on train S labels")
 
     args = parser.parse_args()
 
