@@ -155,13 +155,13 @@ def train_classifiers(args, classifier_paths, model, tokenizer, training_data_li
 def __main__():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train-lang-base-path', type=str,
-        default="/u/nlp/data/dependency_treebanks/UD/2.5/UD_Greek-GDT/el_gdt-ud",
+        default="ud/en_ewt-ud",
         help="The path to the UD treebanks of the language we're training the classifier on. The path should be without the '-train.connlu'/'-test.conllu' part")
     parser.add_argument('--test-lang-fn', type=str,
-        default="/u/nlp/data/dependency_treebanks/UD/2.5/UD_English-PUD/en_pud-ud-test.conllu",
+        default="ud/en_ewt-ud-test.conllu",
         help="The path to the UD treebank file we're testing the classifier on")
     parser.add_argument('--train-lang-fn', type=str,
-        default="/u/nlp/data/dependency_treebanks/UD/2.5/UD_English-PUD/en_pud-ud-train.conllu",
+        default="ud/en_ewt-ud-train.conllu",
         help="The path to the UD treebank file we're training the classifier on")
     parser.add_argument('--only-ao', action="store_true",
                         help="When this option is set, the classifier is trained only on A and O nouns (no S to give away alignment)")
