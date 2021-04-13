@@ -1,6 +1,8 @@
 """
 Copied from textacy
 """
+from __future__ import annotations
+
 import pathlib
 import re
 import itertools
@@ -10,9 +12,6 @@ from spacy import attrs
 from spacy.language import Language
 from spacy.symbols import NOUN, PROPN, VERB
 from spacy.tokens import Doc, Span, Token
-
-
-from __future__ import annotations
 
 import collections
 from operator import attrgetter
