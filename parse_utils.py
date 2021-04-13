@@ -367,7 +367,7 @@ def subject_verb_object_triples(doclike: types.DocLike) -> Iterable[SVOTriple]:
                 )
         # expand verbs and restructure into svo triples
         for verb, so_dict in verb_sos.items():
-            if so_dict["subjects"] and so_dict["objects"]:
+            if so_dict["subjects"] or so_dict["objects"]:
                 yield SVOTriple(
                     subject=sorted(so_dict["subjects"], key=attrgetter("i")),
                     verb=sorted(expand_verb(verb), key=attrgetter("i")),
