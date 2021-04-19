@@ -78,7 +78,7 @@ def txt2conllu(s):
     return tokenlist
 
 
-def get_tokens_and_labels(data_path, limit=-1, case_set=None, f_type="conllu"
+def get_tokens_and_labels(data_path, limit=-1, case_set=None, f_type="conllu",
                           role_set=["A","O"], balanced=False, only_pronouns=False):
     """
     From the conll file, get three lists of lists and an int:
