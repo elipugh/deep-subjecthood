@@ -10,6 +10,8 @@ import numpy as np
 import torch.optim as optim
 import h5py
 
+from parse_utils import subject_verb_object_triples as svo_triples
+
 import sys
 sys.path.insert(0, "../")
 import os
@@ -20,6 +22,14 @@ import json
 #     get_lang_texts_ud,
 #     run_bert,
 # )
+
+import re
+import nltk
+nltk.download('punkt')
+from nltk.tokenize import sent_tokenize as tokenize
+
+import spacy
+nlp = spacy.load("en_core_web_sm")
 
 with open('verb_types.json') as f:
     verb_types = json.load(f)
@@ -55,7 +65,20 @@ def zip2(*iterables, strict=True):
             msg = f"zip() argument {i+1} is longer than argument{plural}{i}"
             raise ValueError(msg)
 
-def get_tokens_and_labels_txt(filename, limit=-1, case_set=None,
+def txt2conllu(s):
+    doc = nlp(s)
+    tokenlist = []
+    for t in doc:
+        conll_token = {}
+        conll_token["upostag"] = t.pos_
+        conll_token["lemma"] = t.lemma_
+        conll_token["head"] = t.head.i+1
+        conll_token["deprel"] = t.dep_.lower()
+        tokenlist += [conll_token]
+    return tokenlist
+
+
+def get_tokens_and_labels(data_path, limit=-1, case_set=None, f_type="conllu"
                           role_set=["A","O"], balanced=False, only_pronouns=False):
     """
     From the conll file, get three lists of lists and an int:
@@ -77,105 +100,27 @@ def get_tokens_and_labels_txt(filename, limit=-1, case_set=None,
     case_set: What cases to count as cases
     role_set: Which ASO roles to count.
     """
-    with open(filename) as f:
-        data = f.read()
-    sentences = conllu.parse(conll_data)
-    tokens = []
-    case_labels = []
-    role_labels = []
-    cases_per_role = defaultdict(Counter)
-    word_forms_list = []
-    animacy_labels = []
-    verb_type_labels = []
-    relevant_examples_index = []
-    if balanced:
-        assert role_set is not None, "Must provide which roles to balance if we're balancing!"
-    # Closed set of possibilities if balanced, open otherwise
-    if balanced:
-        role_example_counts = dict([(role, 0) for role in role_set])
-    else:
-        role_example_counts = Counter()
-    num_nouns = 0
-    num_relevant_examples = 0
-    for sent_i, tokenlist in enumerate(sentences):
-        sent_tokens = []
-        sent_case_labels = []
-        sent_role_labels = []
-        sent_forms = []
-        sent_animacies = []
-        sent_verb_types = []
-        for token in tokenlist:
-            token_role, token_forms = get_token_info(token, tokenlist)
-            token_case = None
-            token_animacy = ""
-            if token_role is not None:
-                if token['feats'] and 'Case' in token['feats']:
-                    token_case = token['feats']['Case']
-                if token['feats'] and 'Animacy' in token['feats']:
-                    token_animacy = token['feats']['Animacy']
-            sent_tokens.append(token['form'])
-            sent_case_labels.append(token_case)
-            sent_role_labels.append(token_role)
-            sent_forms.append(token_forms)
-            sent_animacies.append(token_animacy)
-            if token_forms is not None:
-                sent_verb_types.append(verb2type[token_forms['verb']])
-            else:
-                sent_verb_types.append("")
-        tokens.append(sent_tokens)
-        assert len(sent_case_labels) == len(sent_role_labels), \
-               "Length of case and role should be the same for every sentence (though both lists can include Nones)"
-        case_labels.append(sent_case_labels)
-        role_labels.append(sent_role_labels)
-        word_forms_list.append(sent_forms)
-        animacy_labels.append(sent_animacies)
-        verb_type_labels.append(sent_verb_types)
-        for i in range(len(sent_role_labels)):
-            role_ok = role_set is None or sent_role_labels[i] in role_set
-            role_ok = role_ok and sent_role_labels[i] is not None
-            case_ok = case_set is None or sent_case_labels[i] in case_set
-            if role_ok and case_ok:
-                relevant_examples_index.append((sent_i, i))
-                role_example_counts[sent_role_labels[i]] += 1
-            cases_per_role[sent_role_labels[i]][sent_case_labels[i]] += 1
+    if f_type == "conllu":
+        with open(data_path) as f:
+            file_data = f.read()
+        sentences = conllu.parse(file_data)
 
-        if limit > 0:
-            if balanced:
-                num_relevant_examples = min(role_example_counts.values())*len(role_example_counts)
-            else:
-                num_relevant_examples = sum(role_example_counts.values())
-            if num_relevant_examples >= limit:
-                break
-    print("Counts of each role", role_example_counts)
-    print("Case counts per role", cases_per_role)
-    return tokens, case_labels, role_labels, word_forms_list, animacy_labels, verb_type_labels, num_relevant_examples, relevant_examples_index, cases_per_role
+    elif f_type == "txt":
+        sentences = []
+        for data_source_dir in os.listdir(data_path):
+            for fname in os.listdir(os.path.join(data_source_dir, data_path)):
+                with open(fname) as f:
+                    data = f.read()
+                data = re.sub('[@#]', '', data)
+                for p in ".,?!":
+                    data = re.sub(" \\"+p, p, data)
+                data = re.sub('[@#]', '', data)
+                for p in ".,?!":
+                    data = re.sub(" \\"+p, p, data)
+                s_tokens = tokenize(data)
+                for s in s_tokens:
+                    sentences += [ txt2conllu(s) ]
 
-
-def get_tokens_and_labels(filename, limit=-1, case_set=None,
-                          role_set=["A","O"], balanced=False, only_pronouns=False):
-    """
-    From the conll file, get three lists of lists and an int:
-    - tokens: each list in tokens is a list of words in the sentence.
-    - case_labels: each list in case_labels is the case labels of each word in
-                   the sentence (None if the word is not marked for case).
-    - role_labels: Whether each word is an A(gent) subject of a transitive
-                       verb, O(bject) object of a transitive verb, or S(ubject),
-                       only argument of an intransitive verb. This expands the
-                       subject-object labels to work for both Nominative and
-                       Ergative languages.
-                       The labels is None if the word is not a noun.
-    - length: The number of cased nouns
-
-    Parameters:
-    filename: the location of the treebank (conll file)
-    limit: how many relevant examples should this corpus contain? Relevant means
-           nouns of a role in ROLE_SET and CASE_SET (if not None), and balanced if BALANCED
-    case_set: What cases to count as cases
-    role_set: Which ASO roles to count.
-    """
-    with open(filename) as f:
-        conll_data = f.read()
-    sentences = conllu.parse(conll_data)
     tokens = []
     case_labels = []
     role_labels = []

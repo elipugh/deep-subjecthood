@@ -13,7 +13,7 @@ def custom_collate_fn(batch):
     return torch.nn.utils.rnn.pad_sequence(batch, batch_first=True)
 
 class CaseDataset:
-    def __init__(self, fname, model, tokenizer, limit=-1, case_set=None, role_set=None, balanced=False, average=False):
+    def __init__(self, fname, model, tokenizer, limit=-1, case_set=None, f_type="conllu", role_set=None, balanced=False, average=False):
       self.fname = fname
       self.case_set = case_set
       self.role_set = role_set
@@ -54,7 +54,7 @@ class CaseDataset:
       else:
           self.tokens, self.case_labels, self.role_labels, self.word_forms_list, \
           self.animacy_labels, self.verb_type_labels, self.len, self.relevant_examples_index, self.cases_per_role  = \
-              utils.get_tokens_and_labels(self.fname, limit=limit, case_set=case_set, role_set=role_set, balanced=balanced)
+              utils.get_tokens_and_labels(self.fname, limit=limit, f_type=f_type case_set=case_set, role_set=role_set, balanced=balanced)
           self.bert_tokens, self.bert_ids, self.orig_to_bert_map, self.bert_to_orig_map = \
               utils.get_bert_tokens(self.tokens, tokenizer)
           print("lengths of bert ids etc", len(self.bert_tokens), len(self.bert_ids), len(self.orig_to_bert_map), len(self.bert_to_orig_map))
