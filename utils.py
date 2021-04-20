@@ -74,6 +74,7 @@ def txt2conllu(s):
         conll_token["lemma"] = t.lemma_
         conll_token["head"] = t.head.i+1
         conll_token["deprel"] = t.dep_.lower()
+        conll_token["form"] = t.text
         tokenlist += [conll_token]
     return tokenlist
 
