@@ -59,7 +59,10 @@ def run_experiment(args):
             args.train_lang_base_path + "-test.conllu", model, tokenizer,
             limit=TEST_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
     print(f"Loading the dest test set, with limit {TEST_DATA_LIMIT}")
-    dest_test = data.CaseDataset(args.test_lang_fn, model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
+    if args.f_type == "txt":
+        dest_test = data.CaseDataset(args.train_lang_base_path, model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
+    elif args.f_type == "conllu":
+        dest_test = data.CaseDataset(args.test_lang_fn, model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
 
     out_df = pd.DataFrame([])
     # Layers trained in reverse so we can make sure code is working with informative layers early
@@ -118,13 +121,20 @@ def run_experiment(args):
 def train_classifiers(args, classifier_paths, model, tokenizer, training_data_limit, training_role_set, balanced=False, average=False):
     print("Need to train classifiers!")
     print(f"Loading the source train set, with limit {training_data_limit}")
-    src_train = data.CaseDataset(args.train_lang_base_path + "-train.conllu",
+    if args.f_type == "txt":
+        fname = args.train_lang_base_path
+    elif args.f_type == "conllu":
+        fname = args.train_lang_base_path + "-train.conllu"
+    src_train = data.CaseDataset(fname,
         model, tokenizer, limit=training_data_limit, role_set=training_role_set, f_type=args.f_type, balanced=balanced, average=average)
     print(f"Length of train set is {len(src_train)}, limit is {training_data_limit}")
     if len(src_train) < training_data_limit:
         print("Too small! Exiting")
         sys.exit()
-    src_test = data.CaseDataset(args.train_lang_base_path + "-test.conllu", model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, average=average)
+    if args.f_type == "txt":
+        src_test = src_train
+    elif args.f_type == "conllu":
+        src_test = data.CaseDataset(args.train_lang_base_path + "-test.conllu", model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, average=average)
     num_layers = model.config.num_hidden_layers
     for layer in reversed(range(num_layers+1)):
         classifier_path = classifier_paths[layer]
