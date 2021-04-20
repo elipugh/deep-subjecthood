@@ -104,6 +104,7 @@ def get_tokens_and_labels(data_path, limit=-1, f_type="conllu",
         sentences = conllu.parse(file_data)
 
     elif f_type == "txt":
+        per_source_limit = limit // (29*5) # num coca text files
         sentences = []
         for data_source_dir in os.listdir(data_path):
             cur_dir = os.path.join(data_path,data_source_dir)

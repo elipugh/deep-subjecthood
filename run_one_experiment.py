@@ -22,6 +22,8 @@ BASQUE_AO_CASED_NOUNS_BALANCED = 2025
 
 TEST_DATA_LIMIT = 2000000
 
+COCA_DATA_LIMIT = 20000
+
 def run_experiment(args):
     train_tb_name = os.path.split(args.train_lang_base_path)[1]
     tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
@@ -50,19 +52,23 @@ def run_experiment(args):
     if has_trained_classifiers:
         print("Classifiers already trained!")
 
+    if args.f_type == "txt":
+        coca = data.CaseDataset(args.train_lang_base_path, model, tokenizer, limit=COCA_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
+    else:
+        coca = None
     if not has_trained_classifiers:
         train_classifiers(
-            args, classifier_paths, model, tokenizer, training_data_limit, training_sent_roles, balanced=args.balance, average=args.average_embs)
+            args, classifier_paths, model, tokenizer, training_data_limit, training_sent_roles, balanced=args.balance, average=args.average_embs, cd=coca)
     if args.reeval_src_test:
         print(f"Loading the source test set, with limit {TEST_DATA_LIMIT}")
         src_test = data.CaseDataset(
             args.train_lang_base_path + "-test.conllu", model, tokenizer,
             limit=TEST_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
     print(f"Loading the dest test set, with limit {TEST_DATA_LIMIT}")
-    if args.f_type == "txt":
-        dest_test = data.CaseDataset(args.train_lang_base_path, model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
-    elif args.f_type == "conllu":
+    if args.f_type == "conllu":
         dest_test = data.CaseDataset(args.test_lang_fn, model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
+    else:
+        dest_text = coca
 
     out_df = pd.DataFrame([])
     # Layers trained in reverse so we can make sure code is working with informative layers early
@@ -118,15 +124,16 @@ def run_experiment(args):
 
     out_df.to_csv(os.path.join("results", args.output_fn))
 
-def train_classifiers(args, classifier_paths, model, tokenizer, training_data_limit, training_role_set, balanced=False, average=False):
+def train_classifiers(args, classifier_paths, model, tokenizer, training_data_limit, training_role_set, balanced=False, average=False, cd=None):
     print("Need to train classifiers!")
     print(f"Loading the source train set, with limit {training_data_limit}")
     if args.f_type == "txt":
         fname = args.train_lang_base_path
+        src_train = cd
     elif args.f_type == "conllu":
         fname = args.train_lang_base_path + "-train.conllu"
-    src_train = data.CaseDataset(fname,
-        model, tokenizer, limit=training_data_limit, role_set=training_role_set, f_type=args.f_type, balanced=balanced, average=average)
+        src_train = data.CaseDataset(fname,
+            model, tokenizer, limit=training_data_limit, role_set=training_role_set, f_type=args.f_type, balanced=balanced, average=average)
     print(f"Length of train set is {len(src_train)}, limit is {training_data_limit}")
     if len(src_train) < training_data_limit:
         print("Too small! Exiting")
