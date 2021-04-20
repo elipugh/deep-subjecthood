@@ -22,7 +22,7 @@ BASQUE_AO_CASED_NOUNS_BALANCED = 2025
 
 TEST_DATA_LIMIT = 2000000
 
-COCA_DATA_LIMIT = 20000
+COCA_DATA_LIMIT = 29*5*1000
 
 def run_experiment(args):
     train_tb_name = os.path.split(args.train_lang_base_path)[1]

@@ -109,6 +109,8 @@ def get_tokens_and_labels(data_path, limit=-1, f_type="conllu",
         for data_source_dir in os.listdir(data_path):
             cur_dir = os.path.join(data_path,data_source_dir)
             for fname in os.listdir(cur_dir):
+                if fname[-5:] != "short":
+                    continue
                 print("Loading", fname)
                 with open(os.path.join(cur_dir, fname)) as f:
                     data = f.read()
@@ -119,7 +121,7 @@ def get_tokens_and_labels(data_path, limit=-1, f_type="conllu",
                 for p in ".,?!":
                     data = re.sub(" \\"+p, p, data)
                 s_tokens = tokenize(data)
-                for s in s_tokens:
+                for s in s_tokens[:per_source_limit]:
                     sentences += [ txt2conllu(s) ]
 
     tokens = []
