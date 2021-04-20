@@ -68,7 +68,7 @@ def run_experiment(args):
     if args.f_type == "conllu":
         dest_test = data.CaseDataset(args.test_lang_fn, model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
     else:
-        dest_text = coca
+        dest_test = coca
 
     out_df = pd.DataFrame([])
     # Layers trained in reverse so we can make sure code is working with informative layers early
