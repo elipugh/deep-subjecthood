@@ -106,8 +106,9 @@ def get_tokens_and_labels(data_path, limit=-1, f_type="conllu",
     elif f_type == "txt":
         sentences = []
         for data_source_dir in os.listdir(data_path):
-            for fname in os.listdir(os.path.join(data_path,data_source_dir)):
-                with open(fname) as f:
+            cur_dir = os.listdir(os.path.join(data_path,data_source_dir))
+            for fname in cur_dir:
+                with open(os.path.join(cur_dir, fname)) as f:
                     data = f.read()
                 data = re.sub('[@#]', '', data)
                 for p in ".,?!":
