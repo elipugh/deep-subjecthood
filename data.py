@@ -147,7 +147,7 @@ class CaseLayerDataset(data.Dataset):
 
     def get_labels(self, bert_outputs, role_labels, word_forms_list, verb_type_labels, orig_to_bert_map, relevant_examples_index, pool_method="first"):
         train = []
-        out_role_labels, out_word_forms, out_verb_type_labels, out_index = [], [], [], [], [], []
+        out_role_labels, out_word_forms, out_verb_type_labels, out_index = [], [], [], []
         indices_by_role = defaultdict(list)
         for sentence_num, word_num in relevant_examples_index:
             role_label = role_labels[sentence_num][word_num]
