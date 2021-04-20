@@ -75,6 +75,7 @@ def txt2conllu(s):
         conll_token["head"] = t.head.i+1
         conll_token["deprel"] = t.dep_.lower()
         conll_token["form"] = t.text
+        conll_token["id"] = t.i
         tokenlist += [conll_token]
     return tokenlist
 
@@ -181,7 +182,10 @@ def get_token_info(token, tokenlist):
         return None, None
 
     head_id = token['head']
-    head_list = tokenlist.filter(id=head_id)
+    try:
+        head_list = tokenlist.filter(id=head_id)
+    except:
+        head_list = [t for t in tokenlist if t["id"] == head_id]
     head_pos = None
     if len(head_list) > 0:
         head_token = head_list[0]
