@@ -78,13 +78,11 @@ def txt2conllu(s):
     return tokenlist
 
 
-def get_tokens_and_labels(data_path, limit=-1, case_set=None, f_type="conllu",
+def get_tokens_and_labels(data_path, limit=-1, f_type="conllu",
                           role_set=["A","O"], balanced=False, only_pronouns=False):
     """
     From the conll file, get three lists of lists and an int:
     - tokens: each list in tokens is a list of words in the sentence.
-    - case_labels: each list in case_labels is the case labels of each word in
-                   the sentence (None if the word is not marked for case).
     - role_labels: Whether each word is an A(gent) subject of a transitive
                        verb, O(bject) object of a transitive verb, or S(ubject),
                        only argument of an intransitive verb. This expands the
@@ -122,11 +120,8 @@ def get_tokens_and_labels(data_path, limit=-1, case_set=None, f_type="conllu",
                     sentences += [ txt2conllu(s) ]
 
     tokens = []
-    case_labels = []
     role_labels = []
-    cases_per_role = defaultdict(Counter)
     word_forms_list = []
-    animacy_labels = []
     verb_type_labels = []
     relevant_examples_index = []
     if balanced:
@@ -140,45 +135,28 @@ def get_tokens_and_labels(data_path, limit=-1, case_set=None, f_type="conllu",
     num_relevant_examples = 0
     for sent_i, tokenlist in enumerate(sentences):
         sent_tokens = []
-        sent_case_labels = []
         sent_role_labels = []
         sent_forms = []
-        sent_animacies = []
         sent_verb_types = []
         for token in tokenlist:
             token_role, token_forms = get_token_info(token, tokenlist)
-            token_case = None
-            token_animacy = ""
-            if token_role is not None:
-                if token['feats'] and 'Case' in token['feats']:
-                    token_case = token['feats']['Case']
-                if token['feats'] and 'Animacy' in token['feats']:
-                    token_animacy = token['feats']['Animacy']
             sent_tokens.append(token['form'])
-            sent_case_labels.append(token_case)
             sent_role_labels.append(token_role)
             sent_forms.append(token_forms)
-            sent_animacies.append(token_animacy)
             if token_forms is not None:
                 sent_verb_types.append(verb2type[token_forms['verb']])
             else:
                 sent_verb_types.append("")
         tokens.append(sent_tokens)
-        assert len(sent_case_labels) == len(sent_role_labels), \
-               "Length of case and role should be the same for every sentence (though both lists can include Nones)"
-        case_labels.append(sent_case_labels)
         role_labels.append(sent_role_labels)
         word_forms_list.append(sent_forms)
-        animacy_labels.append(sent_animacies)
         verb_type_labels.append(sent_verb_types)
         for i in range(len(sent_role_labels)):
             role_ok = role_set is None or sent_role_labels[i] in role_set
             role_ok = role_ok and sent_role_labels[i] is not None
-            case_ok = case_set is None or sent_case_labels[i] in case_set
-            if role_ok and case_ok:
+            if role_ok:
                 relevant_examples_index.append((sent_i, i))
                 role_example_counts[sent_role_labels[i]] += 1
-            cases_per_role[sent_role_labels[i]][sent_case_labels[i]] += 1
 
         if limit > 0:
             if balanced:
@@ -188,8 +166,7 @@ def get_tokens_and_labels(data_path, limit=-1, case_set=None, f_type="conllu",
             if num_relevant_examples >= limit:
                 break
     print("Counts of each role", role_example_counts)
-    print("Case counts per role", cases_per_role)
-    return tokens, case_labels, role_labels, word_forms_list, animacy_labels, verb_type_labels, num_relevant_examples, relevant_examples_index, cases_per_role
+    return tokens, role_labels, word_forms_list, verb_type_labels, num_relevant_examples, relevant_examples_index
 
 def get_token_info(token, tokenlist):
     token_role = None
@@ -374,9 +351,9 @@ def eval_classifier_ood(classifier, classifier_labelset, dataset):
     A_index = dataset.labeldict["A"]
     dataloader = dataset.get_dataloader(shuffle=False, batch_size=1)
     out = defaultdict(lambda: dict([(label, 0) for label in classifier_labelset]))
-    rows = {"role": [], "case": [], "animacy": [], "verb_type":[], "subject_word": [], "verb_word": [], "object_word": [], "predicted_role": [], "probability_A": []}
+    rows = {"role": [],"verb_type":[], "subject_word": [], "verb_word": [], "object_word": [], "predicted_role": [], "probability_A": []}
     with torch.no_grad():
-        for emb_batch, role_label_batch, (case_label_batch, word_forms_batch, animacy_batch, verb_type_batch, _) in dataloader:
+        for emb_batch, role_label_batch, (word_forms_batch, verb_type_batch, _) in dataloader:
             output = classifier(emb_batch)
             probs = torch.softmax(output, 1)
             A_prob = probs[:,A_index][0].item()
@@ -385,8 +362,6 @@ def eval_classifier_ood(classifier, classifier_labelset, dataset):
             rows["probability_A"].append(A_prob)
             rows["predicted_role"].append(labelset[int(role_predictions[0])])
             rows["role"].append(labelset[int(np.array(role_label_batch)[0])])
-            rows["case"].append(case_label_batch[0])
-            rows["animacy"].append(animacy_batch[0])
             rows["verb_type"].append(verb_type_batch[0])
             rows["subject_word"].append(word_forms_batch["subject"][0])
             rows["verb_word"].append(word_forms_batch["verb"][0])

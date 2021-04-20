@@ -30,30 +30,21 @@ def run_experiment(args):
     model.eval()
     num_layers = model.config.num_hidden_layers
 
-    training_sent_roles = ["A", "O"] if args.only_ao else ["A", "S", "O"]
+    training_sent_roles = ["A", "O"]
     role_code = "".join(training_sent_roles).lower()
-    if args.nom_acc: training_case_set = ["Nom", "Acc"]
-    elif args.erg_abs: training_case_set = ["Erg", "Abs"]
-    elif args.all_major_cases: training_case_set = ['Nom', 'Acc', 'Erg', 'Abs']
-    else: training_case_set = None
 
     if args.balance:
         classifier_paths = [os.path.join("classifiers", f"aso_{train_tb_name}_{args.seed}_{role_code}_balanced_{layer}_exproles") for layer in range(num_layers + 1)]
     else:
         classifier_paths = [os.path.join("classifiers", f"aso_{train_tb_name}_{args.seed}_{role_code}_{layer}_exproles") for layer in range(num_layers + 1)]
-    if training_case_set is not None:
-        classifier_paths = [path + "_" + ''.join(training_case_set) for path in classifier_paths]
     if args.average_embs:
         classifier_paths = [path + "_average" for path in classifier_paths]
 
     # Set the size of our training set to the number of Basque data points, depending on the type of experiment.
-    if args.only_ao:
-        if args.balance:
-            training_data_limit = BASQUE_AO_CASED_NOUNS_BALANCED 
-        else:
-            training_data_limit = BASQUE_AO_CASED_NOUNS
+    if args.balance:
+        training_data_limit = BASQUE_AO_CASED_NOUNS_BALANCED 
     else:
-        training_data_limit = BASQUE_CASED_NOUNS 
+        training_data_limit = BASQUE_AO_CASED_NOUNS
 
     has_trained_classifiers = all([os.path.exists(path) for path in classifier_paths])
     if has_trained_classifiers:
@@ -61,21 +52,21 @@ def run_experiment(args):
 
     if not has_trained_classifiers:
         train_classifiers(
-            args, classifier_paths, model, tokenizer, training_data_limit, training_sent_roles, training_case_set, balanced=args.balance, average=args.average_embs)
+            args, classifier_paths, model, tokenizer, training_data_limit, training_sent_roles, balanced=args.balance, average=args.average_embs)
     if args.reeval_src_test:
         print(f"Loading the source test set, with limit {TEST_DATA_LIMIT}")
         src_test = data.CaseDataset(
             args.train_lang_base_path + "-test.conllu", model, tokenizer,
-            limit=TEST_DATA_LIMIT, case_set=training_case_set, f_type=args.f_type, average=args.average_embs)
+            limit=TEST_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
     print(f"Loading the dest test set, with limit {TEST_DATA_LIMIT}")
-    dest_test = data.CaseDataset(args.test_lang_fn, model, tokenizer, limit=TEST_DATA_LIMIT, case_set=None, f_type=args.f_type, average=args.average_embs)
+    dest_test = data.CaseDataset(args.test_lang_fn, model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
 
     out_df = pd.DataFrame([])
     # Layers trained in reverse so we can make sure code is working with informative layers early
     for layer in reversed(range(num_layers+1)):
         print("On layer", layer)
         classifier_path = classifier_paths[layer]
-        classifier, labelset, labeldict, src_test_accuracy, training_case_distribution = pickle.load(open(classifier_path, "rb"))
+        classifier, labelset, labeldict, src_test_accuracy = pickle.load(open(classifier_path, "rb"))
         print(f"Loaded case classifier from {classifier_path}!")
         print("src_test_accuracy:", src_test_accuracy)
         if args.reeval_src_test:
@@ -98,13 +89,13 @@ def run_experiment(args):
             print(f"Loading the source test set, with limit {TEST_DATA_LIMIT}")
             src_test = data.CaseDataset(
                 args.train_lang_base_path + "-train.conllu", model, tokenizer,
-                limit=TEST_DATA_LIMIT, case_set=training_case_set, f_type=args.f_type, average=args.average_embs)
+                limit=TEST_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
         print(f"Loading the dest test set, with limit {TEST_DATA_LIMIT}")
-        dest_test = data.CaseDataset(args.train_lang_fn, model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, case_set=None, average=args.average_embs)
+        dest_test = data.CaseDataset(args.train_lang_fn, model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, average=args.average_embs)
         for layer in reversed(range(num_layers+1)):
             print("On layer", layer)
             classifier_path = classifier_paths[layer]
-            classifier, labelset, labeldict, src_test_accuracy, training_case_distribution = pickle.load(open(classifier_path, "rb"))
+            classifier, labelset, labeldict, src_test_accuracy = pickle.load(open(classifier_path, "rb"))
             print(f"Loaded case classifier from {classifier_path}!")
             print("src_test_accuracy:", src_test_accuracy)
             if args.reeval_src_test:
@@ -124,17 +115,16 @@ def run_experiment(args):
 
     out_df.to_csv(os.path.join("results", args.output_fn))
 
-def train_classifiers(args, classifier_paths, model, tokenizer, training_data_limit, training_role_set, training_case_set, balanced=False, average=False):
+def train_classifiers(args, classifier_paths, model, tokenizer, training_data_limit, training_role_set, balanced=False, average=False):
     print("Need to train classifiers!")
     print(f"Loading the source train set, with limit {training_data_limit}")
     src_train = data.CaseDataset(args.train_lang_base_path + "-train.conllu",
-        model, tokenizer, limit=training_data_limit, case_set=training_case_set, role_set=training_role_set, f_type=args.f_type, balanced=balanced, average=average)
-    training_case_distribution = src_train.get_case_distribution()
+        model, tokenizer, limit=training_data_limit, role_set=training_role_set, f_type=args.f_type, balanced=balanced, average=average)
     print(f"Length of train set is {len(src_train)}, limit is {training_data_limit}")
     if len(src_train) < training_data_limit:
         print("Too small! Exiting")
         sys.exit()
-    src_test = data.CaseDataset(args.train_lang_base_path + "-test.conllu", model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, case_set=training_case_set, average=average)
+    src_test = data.CaseDataset(args.train_lang_base_path + "-test.conllu", model, tokenizer, limit=TEST_DATA_LIMIT, f_type=args.f_type, average=average)
     num_layers = model.config.num_hidden_layers
     for layer in reversed(range(num_layers+1)):
         classifier_path = classifier_paths[layer]
@@ -150,7 +140,7 @@ def train_classifiers(args, classifier_paths, model, tokenizer, training_data_li
         print(f"Accuracy on test set of training language: {src_test_accuracy}")
         print(f"Saving classifier to {classifier_path}")
         with open(classifier_path, 'wb') as pkl_file:
-            pickle.dump((classifier, train_dataset.get_label_set(), train_dataset.labeldict, src_test_accuracy, training_case_distribution), pkl_file)
+            pickle.dump((classifier, train_dataset.get_label_set(), train_dataset.labeldict, src_test_accuracy), pkl_file)
 
 def __main__():
     parser = argparse.ArgumentParser()
@@ -163,13 +153,8 @@ def __main__():
     parser.add_argument('--train-lang-fn', type=str,
         default="ud/en_ewt-ud-train.conllu",
         help="The path to the UD treebank file we're training the classifier on")
-    parser.add_argument('--only-ao', action="store_true",
-                        help="When this option is set, the classifier is trained only on A and O nouns (no S to give away alignment)")
     parser.add_argument('--balance', action='store_true', 
                         help="When this option is set, ")
-    parser.add_argument("--nom-acc", action="store_true", help="Only train on Nom,Acc nouns")
-    parser.add_argument("--erg-abs", action="store_true", help="Only train on Erg,Abs nouns")
-    parser.add_argument("--all-major-cases", action="store_true", help="Only train on Nom,Acc,Erg,Abs nouns")
     parser.add_argument('--average-embs', action='store_true', help='With this option, use the average embedding of the subwords of a word, rather than the first subword')
     parser.add_argument("--output-fn", type=str, default="last_run",
                         help="Where to save this run's output")
