@@ -24,6 +24,8 @@ TEST_DATA_LIMIT = 2000000
 
 COCA_DATA_LIMIT = 29*5*1000
 
+BERT_LIMIT = 25000 # (don't run out of RAM)
+
 def run_experiment(args):
     train_tb_name = os.path.split(args.train_lang_base_path)[1]
     tokenizer = BertTokenizer.from_pretrained('bert-base-cased')

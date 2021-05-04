@@ -170,8 +170,7 @@ def get_tokens_and_labels(data_path, limit=-1, f_type="conllu",
                 num_relevant_examples = min(role_example_counts.values())*len(role_example_counts)
             else:
                 num_relevant_examples = sum(role_example_counts.values())
-            if num_relevant_examples >= limit:
-                break
+
     print("Counts of each role", role_example_counts)
     return tokens, role_labels, word_forms_list, verb_type_labels, num_relevant_examples, relevant_examples_index
 
