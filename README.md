@@ -1,5 +1,7 @@
 # Deep Subjecthood: Higher Order Grammatical Features in Multilingual BERT
 
+Check out the `Report.pdf`!!
+
 This is and extension of the code used to run the experiments in Deep Subjecthood: Higher Order Grammatical Features in Multilingual BERT.
 
 This has been altered to use English BERT and tag verbs by their type.
